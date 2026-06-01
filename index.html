@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scompidle</title>
+    <link rel="icon" type="image/png" href="ICON.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0b;
+            --card: #141417;
+            --border: #27272a;
+            --text-main: #f7f8fa;
+            --text-muted: #a1a1aa;
+            --color-0: #ff5252;
+            --color-1: #ffab40;
+            --color-2: #69f0ae;
+            --color-3: #448aff;
+            --accent: #ffffff;
+            --slot-bg: #09090b;
+            --btn-bg: #1a1a1e;
+            --btn-hover: #27272b;
+            --guess-border: #303034;
+            --modal-bg: #0d0d0e;
+            --victory: #0a7240;
+        }
+        html.light {
+            --bg: #f8f9fc;
+            --card: #ffffff;
+            --border: #d0d2d8;
+            --text-main: #0e0e12;
+            --text-muted: #555861;
+            --accent: #000000;
+            --slot-bg: #ffffff;
+            --btn-bg: #eef0f4;
+            --btn-hover: #e2e4ea;
+            --guess-border: #d0d2d8;
+            --modal-bg: #ffffff;
+            --victory: #0f9754;
+            --color-2: #0f9754;
+        }
+
+        body {
+            font-family: 'Space Grotesk', 'Inter', -apple-system, sans-serif;
+            background: var(--bg); color: var(--text-main); margin: 0; height: 100vh;
+            display: flex; flex-direction: column; overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+        }
+
+        .account-info { display: flex; align-items: center; gap: 12px; }
+        
+        .uid-tag {
+            background: var(--btn-bg); padding: 6px 14px; border-radius: 99px;
+            color: var(--text-muted); border: 1px solid var(--border); font-family: monospace; font-size: 0.85rem;
+            cursor: pointer; transition: all 0.2s ease; position: relative; width: 170px; text-align: center;
+            overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+        }
+        .uid-tag .hover-text { display: none; }
+        .uid-tag:hover { border-color: #444; color: var(--text-main); background: var(--btn-hover); }
+        .uid-tag:hover .normal-text { display: none; }
+        .uid-tag:hover .hover-text { display: inline; letter-spacing: 0.5px; font-family: 'Inter', sans-serif; font-size: 0.75rem; font-weight: 600; }
+        
+        .streak-badge { 
+            background: rgba(255, 171, 64, 0.15); color: #df820c; 
+            padding: 6px 14px; border-radius: 99px; font-weight: 700; 
+            display: flex; align-items: center; gap: 6px; border: 1px solid rgba(255, 171, 64, 0.15);
+            letter-spacing: 0.5px;
+        }
+
+        .account-actions { display: flex; gap: 8px; }
+        .account-actions button {
+            font-size: 0.8rem; padding: 0px 2px; border-radius: 8px;
+            font-weight: 600; transition: all 0.2s;
+        }
+
+        .topbar {
+            padding: 18px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            position: relative; z-index: 1;
+        }
+        .topbar a { text-decoration: none; color: inherit; }
+        .logo-icon {
+            width: 34px; height: 34px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+        }
+        .logo-icon img { width: 100%; height: 100%; transition: transform 0.35s cubic-bezier(.2,.9,.2,1); }
+        .logo-icon:hover img { transform: rotate(10deg) scale(1.1); }
+        .logo {
+            display: flex; gap: 2px;
+            font-size: 28px; font-weight: 700; color: var(--text-main);
+            letter-spacing: 3px; user-select: none;
+        }
+        .letter {
+            display: inline-block; padding: 4px 2px;
+            border-radius: 6px;
+            transition: transform 0.6s cubic-bezier(.2,.9,.2,1);
+            will-change: transform;
+        }
+
+        main {
+            display: flex; flex: 1; align-items: center; justify-content: center;
+            gap: 120px; max-width: 1100px; margin: 0 auto; padding: 20px; z-index: 1; position: relative;
+        }
+
+        .left-col { display: flex; flex-direction: column; gap: 25px; }
+        .word-slots { display: flex; flex-direction: column; gap: 14px; }
+        .slot-row { display: flex; align-items: center; gap: 12px; }
+        .slot-img {
+            width: 56px; height: 56px; border-radius: 12px;
+            border: 1px solid var(--border); background: var(--slot-bg);
+            overflow: hidden; flex-shrink: 0; display: none;
+        }
+        .slot-img.show { display: block; }
+        .slot-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .slot-img .img-loading, .slot-img .img-fail {
+            width: 100%; height: 100%; display: flex; align-items: center;
+            justify-content: center; font-size: 0.7rem; color: var(--text-muted);
+        }
+        .slot-img .img-fail {
+            font-size: 1.5rem; font-weight: 800; font-family: Fredoka, sans-serif;
+            color: var(--victory); background: var(--slot-bg);
+        }
+        .slot-img .img-loading::after {
+            content: ''; width: 18px; height: 18px;
+            border: 2px solid var(--border); border-top-color: var(--text-main);
+            border-radius: 50%; animation: imgSpin 0.7s linear infinite;
+        }
+        @keyframes imgSpin { to { transform: rotate(360deg); } }
+
+        .slot {
+            height: 56px; width: 340px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 1.3rem; text-transform: uppercase;
+            border: 1px solid var(--border); background: var(--slot-bg);
+            letter-spacing: 2px; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .found-0 { background: var(--color-0); border-color: var(--color-0); color: #000; }
+        .found-1 { background: var(--color-1); border-color: var(--color-1); color: #000; }
+        .found-2 { background: var(--color-2); border-color: var(--color-2); color: #000; }
+        .found-3 { background: var(--color-3); border-color: var(--color-3); color: #000; }
+
+        .current-guess {
+            height: 56px; font-size: 1.8rem; font-weight: 800;
+            letter-spacing: 4px; border-bottom: 2px solid var(--guess-border);
+            text-align: center; display: flex; align-items: center; justify-content: center;
+            color: var(--text-main); min-height: 56px;
+        }
+
+        .right-col { display: flex; flex-direction: column; align-items: center; gap: 25px; min-width: 400px; }
+        .tema { font-size: 1rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 4px; font-weight: 600; }
+
+        .diff-selector { display: flex; gap: 6px; }
+        .diff-btn {
+            padding: 6px 18px; border-radius: 99px; border: 1px solid var(--border);
+            background: transparent; color: var(--text-muted); font-size: 0.75rem;
+            font-weight: 600; cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+        .diff-btn:hover { border-color: #444; color: var(--text-main); }
+        .diff-btn.active {
+            font-family: 'Fredoka', sans-serif;
+            background: var(--victory); color: #fff; border-color: #185;
+            box-shadow: 3px 3px 0 #185;
+        }
+
+        .grid { display: grid; grid-template-columns: repeat(6, 52px); gap: 10px; }
+        .letter-btn {
+            width: 52px; height: 52px; background: var(--card); border: 1px solid var(--border);
+            border-radius: 10px; color: var(--text-main); font-size: 1.2rem; font-weight: 600; cursor: pointer;
+            transition: transform 0.1s, background 0.2s, border-color 0.2s;
+        }
+        .letter-btn:hover { border-color: #3f3f46; background: var(--btn-hover); }
+        .letter-btn:active { transform: scale(0.95); }
+        .letter-btn:disabled { opacity: 0; pointer-events: none; }
+
+        #next-challenge-ui { display: none; flex-direction: column; align-items: center; }
+        #next-challenge-ui h2 { color: var(--color-2); font-size: 1.8rem; margin-bottom: 8px; font-weight: 800; }
+        #timer { font-size: 3.5rem; font-weight: 900; letter-spacing: -2px; color: var(--text-main); }
+
+        .controls { display: flex; gap: 10px; width: 100%; margin-top: 10px; }
+        .btn-action {
+            flex: 1; padding: 14px 0; border-radius: 12px; border: 1px solid var(--border);
+            font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
+            font-size: 0.8rem; transition: all 0.2s;
+        }
+        .delete { background: var(--btn-bg); color: var(--text-muted); }
+        .delete:hover { background: var(--btn-hover); color: var(--text-main); }
+        .shuffle { background: var(--btn-bg); color: var(--text-main); }
+        .shuffle:hover { background: var(--btn-hover); }
+        .send {
+            flex: 1.4; border: none; background: none; padding: 0; position: relative;
+        }
+        .send span {
+            display: block; width: 100%; padding: 14px 0; box-sizing: border-box;
+            font-family: 'Fredoka', sans-serif; font-size: 0.95rem; letter-spacing: 1px;
+            background: var(--victory); color: #fff; border-radius: 20px;
+            box-shadow: 4px 4px 0 #185; pointer-events: none;
+            transition: all 0.2s cubic-bezier(0.7, -0.35, 0.27, 1.55);
+        }
+        .send:hover span {
+            background: var(--victory); color: #fff;
+            box-shadow: 4px 4px 0 #185, 0 0 0 3px #fff inset;
+            animation: squish .1s 1 ease-in forwards;
+        }
+
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(10px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 10; opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+        }
+        .modal-overlay.open { opacity: 1; pointer-events: auto; }
+        
+        .modal-content {
+            background: var(--modal-bg); border: 1px solid var(--border); border-radius: 20px;
+            padding: 30px; width: 90%; max-width: 380px; text-align: center;
+        }
+        .modal-content h3 { margin-top: 0; font-size: 1.3rem; letter-spacing: 1px; color: var(--text-main); font-weight: 800; }
+
+        .input-group { margin-bottom: 16px; text-align: left; }
+        .input-group label { display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;}
+        .input-field {
+            width: 100%; padding: 12px; background: var(--btn-bg); border: 1px solid var(--border);
+            border-radius: 8px; color: var(--text-main); font-size: 0.95rem; box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+        .input-field:focus { border-color: #52525b; outline: none; }
+        .input-field[readonly] { background: var(--slot-bg); color: #ffab40; font-family: monospace; font-weight: bold; border-style: dashed; }
+
+        .auth-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 25px; }
+        .auth-tab {
+            flex: 1; padding: 12px; background: none; border: none; color: var(--text-muted);
+            font-weight: 700; cursor: pointer; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .auth-tab.active { color: var(--text-main); border-bottom: 2px solid var(--accent); }
+
+        .btn-primary {
+            border: none; background: none; padding: 0; cursor: pointer; width: 100%;
+            margin-top: 10px; position: relative;
+        }
+        .btn-primary span {
+            display: block; width: 100%; padding: 14px; box-sizing: border-box;
+            font-family: 'Fredoka', sans-serif; font-size: 0.9rem; letter-spacing: 1px;
+            text-transform: uppercase; background: var(--victory); color: #fff; border-radius: 20px;
+            box-shadow: 4px 4px 0 #185; pointer-events: none;
+            transition: all 0.2s cubic-bezier(0.7, -0.35, 0.27, 1.55);
+        }
+        .btn-primary:hover span {
+            box-shadow: 4px 4px 0 #185, 0 0 0 3px #fff inset;
+            animation: squish .1s 1 ease-in forwards;
+        }
+
+        .profile-menu-btns { display: flex; flex-direction: column; gap: 10px; margin: 20px 0 10px 0; }
+        .btn-profile-op {
+            background: var(--btn-bg); border: 1px solid var(--border); color: var(--text-main); padding: 12px 16px;
+            border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.9rem;
+            transition: all 0.2s; text-align: center; display: flex; justify-content: center; align-items: center;
+        }
+        .btn-profile-op:hover { background: var(--btn-hover); border-color: #444; }
+        .btn-profile-op.danger { color: #ff5252; border-color: rgba(255,82,82,0.15); }
+        .btn-profile-op.danger:hover { background: rgba(255,82,82,0.05); }
+
+        .close-modal-btn {
+            background: var(--btn-bg); color: var(--text-main); font-weight: 600; border: 1px solid var(--border);
+            padding: 12px; border-radius: 8px; cursor: pointer; width: 100%;
+            text-transform: uppercase; letter-spacing: 1px; margin-top: 15px; font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+        .close-modal-btn:hover { background: var(--btn-hover); border-color: #444; color: var(--text-main); }
+
+        #theme-toggle, #github-link {
+            border: none; background: none; border-radius: 8px;
+            padding: 6px 10px; cursor: pointer; font-size: 1.1rem; line-height: 1;
+            transition: all 0.2s; display: flex; align-items: center;
+        }
+        #theme-toggle:hover, #github-link:hover { color: var(--text-main); }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .stat-card { background: var(--btn-bg); border: 1px solid var(--border); padding: 14px; border-radius: 10px; }
+        .stat-val { font-size: 1.6rem; font-weight: 800; color: var(--text-main); margin-bottom: 2px; }
+        .stat-lbl { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .juicy-sm {
+            border: none; background: none; padding: 0; cursor: pointer; position: relative;
+        }
+        .juicy-sm span {
+            display: block; padding: 8px 18px; box-sizing: border-box;
+            font-family: 'Fredoka', sans-serif; font-size: 0.8rem; letter-spacing: 0.5px;
+            text-transform: uppercase; background: var(--victory); color: #fff; border-radius: 14px;
+            box-shadow: 3px 3px 0 #185; pointer-events: none;
+            transition: all 0.2s cubic-bezier(0.7, -0.35, 0.27, 1.55);
+        }
+        .juicy-sm:hover span {
+            box-shadow: 3px 3px 0 #185, 0 0 0 2px #fff inset;
+            animation: squish .1s 1 ease-in forwards;
+        }
+        .juicy-sm.outline span {
+            background: transparent; color: var(--color-2); border: 2px solid #185;
+            box-shadow: 3px 3px 0 #185;
+        }
+        .juicy-sm.outline:hover span {
+            background: #185; color: #fff;
+            box-shadow: 3px 3px 0 #185, 0 0 0 2px #fff inset;
+        }
+
+        @keyframes squish {
+            0% { transform: scale(1.2, 0.58) rotate(-2deg); }
+            100% { transform: scale(1, 1) rotate(-2deg); }
+        }
+
+        #party-overlay {
+            display: none;
+            position: fixed; inset: 0; z-index: 200;
+            align-items: center; justify-content: center;
+        }
+        #party-overlay.open { display: flex; }
+        #party-canvas {
+            width: 512px; height: 350px;
+            max-width: 90vw; max-height: 60vh;
+        }
+
+        #toast {
+            position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%) translateY(100px);
+            background: #fff; color: #000; padding: 12px 35px; border-radius: 8px; 
+            font-weight: 700; font-size: 0.9rem; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4); z-index: 100;
+        }
+        #toast.show { transform: translateX(-50%) translateY(0); }
+
+        .wavy-bg {
+            display: block;
+            position: fixed; inset: 0;
+            width: 100%; height: 100%;
+            z-index: 0; pointer-events: none; overflow: hidden;
+        }
+        .wavy-bg svg {
+            position: absolute;
+            inset-inline-start: 0; inset-block-start: 0;
+            height: 100%; width: max(200%, 100rem);
+            animation: wavyMove 25s ease alternate infinite;
+        }
+        .wavy-rect { fill: rgba(60, 20, 100, 0.25); }
+        .wavy-path-1 { fill: rgba(80, 30, 120, 0.2); }
+        .wavy-path-2 { fill: rgba(100, 40, 140, 0.15); }
+
+        html.light .wavy-rect { fill: rgba(126, 34, 206, 0.25); }
+        html.light .wavy-path-1 { fill: rgba(148, 90, 198, 0.2); }
+        html.light .wavy-path-2 { fill: rgba(177, 134, 215, 0.15); }
+
+        @keyframes wavyMove {
+            100% { transform: translateX(-50%); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="wavy-bg">
+    <svg xmlns="http://www.w3.org/2000/svg" width="1440" height="560" preserveAspectRatio="none" viewBox="0 0 1440 560">
+        <g mask="url(#wavyMask)" fill="none">
+            <rect class="wavy-rect" width="1440" height="560" x="0" y="0" />
+            <path class="wavy-path-1" d="M 0,37 C 72,79.4 216,235.8 360,249 C 504,262.2 576,103 720,103 C 864,103 936,244.6 1080,249 C 1224,253.4 1368,149.8 1440,125 L 1440 560 L 0 560 Z" />
+            <path class="wavy-path-2" d="M 0,356 C 144,384.4 432,513 720,498 C 1008,483 1296,324.4 1440,281 L 1440 560 L 0 560 Z" />
+        </g>
+        <defs>
+            <mask id="wavyMask">
+                <rect width="1440" height="560" fill="#ffffff" />
+            </mask>
+        </defs>
+    </svg>
+</div>
+
+<div class="topbar">
+    <a href="javascript:void(0)" onclick="location.reload()" class="logo-icon" title="Ricarica">
+        <img src="ICON.png" alt="logo" />
+    </a>
+    <a href="javascript:void(0)" onclick="location.reload()" class="logo" id="logo">
+        <span class="letter">S</span>
+        <span class="letter">C</span>
+        <span class="letter">O</span>
+        <span class="letter">M</span>
+        <span class="letter">P</span>
+        <span class="letter">I</span>
+        <span class="letter">D</span>
+        <span class="letter">L</span>
+        <span class="letter">E</span>
+    </a>
+    <div style="flex:1"></div>
+    <a href="https://github.com/methanoo/Scompidle" target="_blank" id="github-link" title="GitHub">
+        <svg width="22" height="22" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+    </a>
+    <button id="theme-toggle" onclick="toggleTheme()" title="Cambia tema">🌙</button>
+    <div class="account-info">
+        <span class="streak-badge">🔥 <span id="streak-display">0</span> ORE</span>
+    </div>
+    <div class="account-actions">
+        <button class="juicy-sm stats-btn" onclick="toggleStats(true)"><span>Statistiche</span></button>
+        <button class="juicy-sm outline" onclick="toggleProfile(true)"><span>Account</span></button>
+    </div>
+</div>
+
+<main>
+    <div class="left-col">
+        <div class="diff-selector" style="margin-bottom:10px">
+            <button class="diff-btn" data-diff="facile" onclick="cambiaDifficolta('facile')">Facile</button>
+            <button class="diff-btn active" data-diff="medio" onclick="cambiaDifficolta('medio')">Medio</button>
+            <button class="diff-btn" data-diff="difficile" onclick="cambiaDifficolta('difficile')">Difficile</button>
+        </div>
+        <div class="word-slots" id="slots-container">
+            <div class="slot-row">
+                <div class="slot-img" id="slot-img-0"></div>
+                <div id="slot-0" class="slot"></div>
+            </div>
+            <div class="slot-row">
+                <div class="slot-img" id="slot-img-1"></div>
+                <div id="slot-1" class="slot"></div>
+            </div>
+            <div class="slot-row">
+                <div class="slot-img" id="slot-img-2"></div>
+                <div id="slot-2" class="slot"></div>
+            </div>
+            <div class="slot-row">
+                <div class="slot-img" id="slot-img-3"></div>
+                <div id="slot-3" class="slot"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="right-col" id="game-ui">
+        <div id="tema-display" class="tema">Caricamento...</div>
+        <div id="guess" class="current-guess"></div>
+        <div id="lettere-container" class="grid"></div>
+        <div class="controls">
+            <button class="btn-action delete" onclick="deleteLast()">Elimina</button>
+            <button class="btn-action shuffle" onclick="shuffleLetters()">Mescola</button>
+            <button class="btn-action send" onclick="checkWord()"><span>Prova</span></button>
+        </div>
+    </div>
+
+    <div class="right-col" id="next-challenge-ui">
+        <h2>Hai completato la sfida!</h2>
+        <p style="color:var(--text-muted)">La prossima sfida tra:</p>
+        <div id="timer">00:00:00</div>
+    </div>
+</main>
+
+<div style="text-align:center;padding:12px 0;font-size:0.65rem;color:var(--text-muted)">
+    <a href="https://www.pexels.com" target="_blank" rel="noopener" style="color:var(--text-muted);text-decoration:underline">Photos provided by Pexels</a>
+</div>
+
+<div class="modal-overlay" id="auth-gate-overlay">
+    <div class="modal-content">
+        <h2 style="margin-top:0; letter-spacing: 4px; font-weight:900;">SCOMPIDLE</h2>
+        
+        <div class="auth-tabs">
+            <button id="tab-signup" class="auth-tab active" onclick="switchAuthTab('signup')">Nuovo Account</button>
+            <button id="tab-login" class="auth-tab" onclick="switchAuthTab('login')">Accedi</button>
+        </div>
+
+        <div id="form-signup">
+            <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:20px;">Imposta una password di sicurezza per conservare i tuoi dati d'accesso in futuro.</p>
+            <div class="input-group">
+                <label>ID Generato</label>
+                <input type="text" id="signup-id" class="input-field" readonly>
+            </div>
+            <div class="input-group">
+                <label>Scegli una Password</label>
+                <input type="password" id="signup-password" class="input-field" placeholder="Minimo 4 caratteri">
+            </div>
+            <button class="btn-primary" onclick="eseguiRegistrazione()"><span>Crea & Gioca</span></button>
+        </div>
+
+        <div id="form-login" style="display:none;">
+            <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:20px;">Inserisci le tue credenziali per sincronizzare i progressi.</p>
+            <div class="input-group">
+                <label>ID Utente</label>
+                <input type="text" id="login-id" class="input-field" placeholder="esempio-id-123">
+            </div>
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" id="login-password" class="input-field" placeholder="Inserisci password">
+            </div>
+            <button class="btn-primary" onclick="eseguiLogin()"><span>Accedi</span></button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="profile-overlay">
+    <div class="modal-content">
+        <h3>GESTIONE ACCOUNT</h3>
+        <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:6px; text-align:left; text-transform:uppercase; font-weight:700;">ID Attuale:</p>
+        
+        <div style="display: flex; gap: 8px; margin-bottom: 20px;">
+            <div id="profile-id-box" style="flex: 1; font-family:monospace; background:var(--slot-bg); padding:12px; border-radius:8px; color:#ffab40; font-weight:bold; font-size:1rem; border:1px solid var(--border); text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">...</div>
+            <button onclick="copyID()" style="background: var(--btn-bg); border: 1px solid var(--border); color: var(--text-main); padding: 0 16px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.setProperty('background', 'var(--btn-hover)'); this.style.borderColor='#444'" onmouseout="this.style.setProperty('background', 'var(--btn-bg)'); this.style.borderColor='var(--border)'">Copia</button>
+        </div>
+        
+        <div class="profile-menu-btns">
+            <button class="btn-profile-op" onclick="mostraCambioPasswordUI()">Modifica Password</button>
+            <button class="btn-profile-op danger" onclick="logoutAccount()">Esci dall'account</button>
+        </div>
+
+        <div id="sub-change-pwd" style="display:none; border-top:1px solid var(--border); padding-top:15px; margin-top:15px; text-align:left;">
+            <div class="input-group">
+                <label>Nuova Password</label>
+                <input type="password" id="change-pwd-input" class="input-field" placeholder="Minimo 4 caratteri">
+            </div>
+            <button class="btn-primary" onclick="salvaNuovaPassword()"><span style="padding:10px; font-size:0.8rem;">Salva password</span></button>
+        </div>
+
+        <button class="close-modal-btn" onclick="toggleProfile(false)">Chiudi</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="stats-overlay">
+    <div class="modal-content">
+        <h3>RECORD PERSONALI</h3>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-val" id="stat-risolti">0</div>
+                <div class="stat-lbl">Risolti</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-val" id="stat-max-streak" style="color:#ffab40;">0</div>
+                <div class="stat-lbl">Max Streak</div>
+            </div>
+            <div class="stat-card" style="grid-column: span 2;">
+                <div class="stat-val" id="stat-tentativi">0.0</div>
+                <div class="stat-lbl">Tentativi Medi per Ora</div>
+            </div>
+        </div>
+        <button class="close-modal-btn" onclick="toggleStats(false)">Chiudi</button>
+    </div>
+</div>
+
+<div id="party-overlay">
+    <canvas id="party-canvas"></canvas>
+</div>
+
+<div id="toast">Non è questa!</div>
+
+<script>
+    let sfida = null, paroleTrovate = [], guessStr = "", lettereRimaste = [], indiciUsatiNelGuess = [];
+    let currentHour = new Date().getHours();
+    let tentativiOraCorrente = 0;
+    let difficoltaCorrente = localStorage.getItem('scompidle_difficolta') || 'medio';
+
+    let userStats = {
+        id: "", password: "", streak: 0, maxStreak: 0, ultimaOraVinta: "", totaleRisolti: 0, totaleTentativi: 0
+    };
+
+    function ottieniChiaveOraAttuale() {
+        const d = new Date();
+        return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}-${d.getHours()}`;
+    }
+    let chiaveOraCorrente = ottieniChiaveOraAttuale();
+
+    function generaIDCasuale() {
+        const animali = ["gatto", "volpe", "lupo", "leone", "aquila", "gufo", "orso", "tigre", "falco", "squalo", "cervo", "lince"];
+        const aggettivi = ["veloce", "pigro", "calmo", "forte", "astuto", "bravo", "bello", "fiero", "saggio", "buono", "rapido"];
+        return `${animali[Math.floor(Math.random() * animali.length)]}-${aggettivi[Math.floor(Math.random() * aggettivi.length)]}-${Math.floor(100 + Math.random() * 900)}`;
+    }
+
+    function switchAuthTab(type) {
+        document.getElementById('tab-signup').classList.toggle('active', type === 'signup');
+        document.getElementById('tab-login').classList.toggle('active', type === 'login');
+        document.getElementById('form-signup').style.display = type === 'signup' ? 'block' : 'none';
+        document.getElementById('form-login').style.display = type === 'login' ? 'block' : 'none';
+    }
+
+    async function initAccount() {
+        let savedStats = localStorage.getItem('scompidle_user_stats');
+        if (savedStats) {
+            userStats = JSON.parse(savedStats);
+            document.getElementById('auth-gate-overlay').classList.remove('open');
+        } else {
+            document.getElementById('signup-id').value = generaIDCasuale();
+            document.getElementById('auth-gate-overlay').classList.add('open');
+            return false;
+        }
+        document.getElementById('profile-id-box').innerText = userStats.id;
+        document.getElementById('streak-display').innerText = userStats.streak;
+        aggiornaPannelloStatsUI();
+        return true;
+    }
+
+    async function eseguiRegistrazione() {
+        const id = document.getElementById('signup-id').value;
+        const password = document.getElementById('signup-password').value.trim();
+        if (password.length < 4) { alert("La password deve contenere almeno 4 caratteri."); return; }
+
+        userStats = { id, password, streak: 0, maxStreak: 0, ultimaOraVinta: "", totaleRisolti: 0, totaleTentativi: 0 };
+
+        try {
+            const res = await fetch('/api/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, password })
+            });
+            const data = await res.json();
+            if (data.error) { alert(data.error); return; }
+        } catch(e) { alert("Errore di connessione con il server."); return; }
+
+        localStorage.setItem('scompidle_user_stats', JSON.stringify(userStats));
+        document.getElementById('auth-gate-overlay').classList.remove('open');
+        showToast("Account attivato.");
+        init();
+    }
+
+    async function eseguiLogin() {
+        const id = document.getElementById('login-id').value.trim();
+        const password = document.getElementById('login-password').value.trim();
+        if (!id || !password) { alert("Compila tutti i dati."); return; }
+
+        try {
+            const res = await fetch(`/api/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, password })
+            });
+            const data = await res.json();
+
+            if (data.error) {
+                alert(`Errore: ${data.error}`);
+            } else {
+                userStats = {
+                    id: data.id_utente, password, streak: data.streak, maxStreak: data.max_streak,
+                    ultimaOraVinta: data.ultima_ora_vinta, totaleRisolti: data.totale_risolti, totaleTentativi: data.totale_tentativi
+                };
+                localStorage.setItem('scompidle_user_stats', JSON.stringify(userStats));
+                localStorage.removeItem('scompidle_save'); 
+                document.getElementById('auth-gate-overlay').classList.remove('open');
+                location.reload();
+            }
+        } catch (e) { alert("Errore di connessione durante il login."); }
+    }
+
+    async function syncConServer() {
+        if (!userStats.id) return;
+        try {
+            await fetch('/api/sync', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id: userStats.id, password: userStats.password,
+                    stats: {
+                        streak: userStats.streak, maxStreak: userStats.maxStreak,
+                        ultimaOraVinta: userStats.ultimaOraVinta, totaleRisolti: userStats.totaleRisolti, totaleTentativi: userStats.totaleTentativi
+                    }
+                })
+            });
+        } catch(e) { console.error("Sync fallito con il server"); }
+    }
+
+    function logoutAccount() {
+        localStorage.clear();
+        location.reload();
+    }
+
+    function mostraCambioPasswordUI() {
+        const box = document.getElementById('sub-change-pwd');
+        box.style.display = box.style.display === 'none' ? 'block' : 'none';
+    }
+
+    async function salvaNuovaPassword() {
+        const nuovaPsw = document.getElementById('change-pwd-input').value.trim();
+        if (nuovaPsw.length < 4) { alert("Password troppo corta."); return; }
+        userStats.password = nuovaPsw;
+        localStorage.setItem('scompidle_user_stats', JSON.stringify(userStats));
+        await syncConServer();
+        document.getElementById('change-pwd-input').value = "";
+        document.getElementById('sub-change-pwd').style.display = 'none';
+        showToast("Password aggiornata.");
+    }
+
+    function aggiornaPannelloStatsUI() {
+        document.getElementById('stat-risolti').innerText = userStats.totaleRisolti;
+        document.getElementById('stat-max-streak').innerText = userStats.maxStreak || userStats.streak;
+        const media = userStats.totaleRisolti > 0 ? (userStats.totaleTentativi / userStats.totaleRisolti).toFixed(1) : "0.0";
+        document.getElementById('stat-tentativi').innerText = media;
+    }
+
+    function toggleStats(show) { aggiornaPannelloStatsUI(); document.getElementById('stats-overlay').classList.toggle('open', show); }
+    function toggleProfile(show) { document.getElementById('profile-overlay').classList.toggle('open', show); if(!show) document.getElementById('sub-change-pwd').style.display = 'none'; }
+    function copyID() { navigator.clipboard.writeText(userStats.id); showToast("ID copiato negli appunti."); }
+    function showToast(msg) { const t = document.getElementById('toast'); t.innerText = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); }
+
+    function toggleTheme() {
+        const html = document.documentElement;
+        const isLight = html.classList.toggle('light');
+        localStorage.setItem('scompidle_theme', isLight ? 'light' : 'dark');
+        document.getElementById('theme-toggle').innerText = isLight ? '☀️' : '🌙';
+    }
+
+    function initTheme() {
+        const saved = localStorage.getItem('scompidle_theme');
+        const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        const useLight = saved === 'light' || (!saved && prefersLight);
+        if (useLight) {
+            document.documentElement.classList.add('light');
+            document.getElementById('theme-toggle').innerText = '☀️';
+        }
+    }
+    initTheme();
+
+    function salvaProgressoCorrente() {
+        const key = `scompidle_save_${chiaveOraCorrente}_${difficoltaCorrente}`;
+        localStorage.setItem(key, JSON.stringify({
+            paroleTrovate, lettereRimaste, tentativiOraCorrente
+        }));
+    }
+
+    function caricaProgresso(diff) {
+        const key = `scompidle_save_${chiaveOraCorrente}_${diff}`;
+        const saved = JSON.parse(localStorage.getItem(key));
+        if (saved && saved.paroleTrovate) {
+            paroleTrovate = saved.paroleTrovate;
+            lettereRimaste = saved.lettereRimaste;
+            tentativiOraCorrente = saved.tentativiOraCorrente || 0;
+        } else {
+            paroleTrovate = [];
+            lettereRimaste = sfida ? [...sfida.lettere] : [];
+            tentativiOraCorrente = 0;
+        }
+    }
+
+    function difficoltaCompletata(diff) {
+        const key = `scompidle_done_${chiaveOraCorrente}_${diff}`;
+        return localStorage.getItem(key) === 'true';
+    }
+
+    function cambiaDifficolta(diff) {
+        if (diff === difficoltaCorrente) return;
+        salvaProgressoCorrente();
+        for (let i = 0; i < 4; i++) {
+            const el = document.getElementById(`slot-img-${i}`);
+            if (el) { el.classList.remove('show'); el.innerHTML = ''; }
+        }
+        difficoltaCorrente = diff;
+        localStorage.setItem('scompidle_difficolta', diff);
+        showToast(`Difficoltà: ${diff.charAt(0).toUpperCase() + diff.slice(1)}`);
+        paroleTrovate = [];
+        lettereRimaste = [];
+        guessStr = "";
+        indiciUsatiNelGuess = [];
+        tentativiOraCorrente = 0;
+        init();
+    }
+
+    async function init() {
+        const isLogged = await initAccount();
+        if (!isLogged) return;
+
+        chiaveOraCorrente = ottieniChiaveOraAttuale();
+        currentHour = new Date().getHours();
+
+        localStorage.removeItem('scompidle_save');
+
+        const chiaveOraPrecedente = new Date(Date.now() - 3600000);
+        const oraPrecKey = `${chiaveOraPrecedente.getFullYear()}-${chiaveOraPrecedente.getMonth()+1}-${chiaveOraPrecedente.getDate()}-${chiaveOraPrecedente.getHours()}`;
+        ['facile','medio','difficile'].forEach(d => {
+            localStorage.removeItem(`scompidle_save_${oraPrecKey}_${d}`);
+            localStorage.removeItem(`scompidle_done_${oraPrecKey}_${d}`);
+        });
+
+        try {
+            const res = await fetch(`/api/sfida-corrente?difficolta=${difficoltaCorrente}`);
+            if (!res.ok) throw new Error("Sfida non pronta");
+            sfida = await res.json();
+            sfida.parole_soluzione.sort((a, b) => a.length - b.length);
+            
+            const completata = difficoltaCompletata(difficoltaCorrente);
+            
+            if (completata) {
+                paroleTrovate = [0, 1, 2, 3];
+                lettereRimaste = [];
+            } else {
+                caricaProgresso(difficoltaCorrente);
+                if (paroleTrovate.length === 0 && sfida) {
+                    lettereRimaste = [...sfida.lettere];
+                }
+            }
+
+            document.querySelectorAll('.diff-btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.diff === difficoltaCorrente);
+            });
+            const completato = paroleTrovate.length === 4;
+            document.getElementById('game-ui').style.display = completato ? "none" : "flex";
+            document.getElementById('next-challenge-ui').style.display = completato ? "flex" : "none";
+            document.getElementById('tema-display').innerText = "Argomento: " + sfida.tema;
+            
+            for(let i=0; i<4; i++) {
+                const s = document.getElementById(`slot-${i}`);
+                if (paroleTrovate.includes(i)) {
+                    s.innerText = sfida.parole_soluzione[i];
+                    s.className = `slot found-${i}`;
+                } else {
+                    s.innerText = ""; s.className = "slot";
+                }
+            }
+            render();
+        } catch (e) {
+            console.error("Errore caricamento sfida", e);
+            document.getElementById('tema-display').innerText = "Attendi, generazione in corso...";
+            setTimeout(() => init(), 5000);
+        }
+    }
+
+    function saveState() {
+        if (!userStats.id) return;
+        salvaProgressoCorrente();
+    }
+
+    function render() {
+        const container = document.getElementById('lettere-container');
+        container.innerHTML = "";
+        lettereRimaste.forEach((l, i) => {
+            const btn = document.createElement('button');
+            btn.className = 'letter-btn'; btn.innerText = l;
+            if (indiciUsatiNelGuess.includes(i)) btn.style.opacity = "0.15";
+            btn.onclick = () => addLetter(l, i);
+            container.appendChild(btn);
+        });
+    }
+
+    function addLetter(l, i) { if (indiciUsatiNelGuess.includes(i)) return; guessStr += l; indiciUsatiNelGuess.push(i); render(); updateDisplay(); }
+    function updateDisplay() { document.getElementById('guess').innerText = guessStr; }
+    function deleteLast() { if (guessStr.length === 0) return; guessStr = guessStr.slice(0, -1); indiciUsatiNelGuess.pop(); render(); updateDisplay(); }
+    function shuffleLetters() { lettereRimaste.sort(() => Math.random() - 0.5); guessStr = ""; indiciUsatiNelGuess = []; render(); updateDisplay(); saveState(); }
+
+    function checkWord() {
+        if(guessStr.length === 0) return;
+        tentativiOraCorrente++;
+        const p = guessStr.toLowerCase().trim();
+        const idx = sfida.parole_soluzione.indexOf(p);
+
+        if (idx !== -1 && !paroleTrovate.includes(idx)) {
+            paroleTrovate.push(idx);
+            const s = document.getElementById(`slot-${idx}`);
+            s.innerText = p; s.classList.add(`found-${idx}`);
+            indiciUsatiNelGuess.sort((a, b) => b - a).forEach(i => lettereRimaste.splice(i, 1));
+            guessStr = ""; indiciUsatiNelGuess = [];
+            saveState(); render(); updateDisplay();
+            generaImmagine(sfida.parole_soluzione[idx], idx);
+            if (paroleTrovate.length === 4) showVictory();
+        } else {
+            showToast("Parola errata");
+            guessStr = ""; indiciUsatiNelGuess = []; render(); updateDisplay(); saveState();
+        }
+    }
+
+    function showVictory() {
+        startParty();
+        document.getElementById('game-ui').style.display = "none";
+        document.getElementById('next-challenge-ui').style.display = "flex";
+        
+        const doneKey = `scompidle_done_${chiaveOraCorrente}_${difficoltaCorrente}`;
+        if (!localStorage.getItem(doneKey)) {
+            localStorage.setItem(doneKey, 'true');
+        }
+
+        const giaCompletataUnAltra = ['facile','medio','difficile'].some(
+            d => d !== difficoltaCorrente && difficoltaCompletata(d)
+        );
+        
+        if (userStats.ultimaOraVinta !== chiaveOraCorrente && !giaCompletataUnAltra) {
+            userStats.streak = userStats.streak + 1;
+            if (userStats.streak > userStats.maxStreak) userStats.maxStreak = userStats.streak;
+
+            userStats.totaleRisolti += 1;
+            userStats.totaleTentativi += tentativiOraCorrente;
+            userStats.ultimaOraVinta = chiaveOraCorrente;
+            
+            localStorage.setItem('scompidle_user_stats', JSON.stringify(userStats));
+            document.getElementById('streak-display').innerText = userStats.streak;
+            syncConServer();
+        }
+    }
+
+    setInterval(() => {
+        if (!userStats.id) return;
+        const oraAttuale = new Date();
+        if (oraAttuale.getHours() !== currentHour) { init(); }
+        
+        const prossimaOra = new Date(); prossimaOra.setHours(currentHour + 1, 0, 0, 0);
+        const diff = prossimaOra - oraAttuale;
+        const h = Math.floor(diff / 3600000).toString().padStart(2, '0');
+        const m = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
+        const s = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
+        document.getElementById('timer').innerText = `${h}:${m}:${s}`;
+    }, 1000);
+
+    window.addEventListener('keydown', (e) => {
+        if (!userStats.id || difficoltaCompletata(difficoltaCorrente)) return;
+        const k = e.key.toUpperCase();
+        if (/^[A-Z]$/.test(k)) {
+            const target = lettereRimaste.findIndex((l, i) => l === k && !indiciUsatiNelGuess.includes(i));
+            if (target !== -1) addLetter(k, target);
+        } else if (e.code === 'Space') { e.preventDefault(); shuffleLetters(); }
+        else if (e.key === 'Enter') { e.preventDefault(); checkWord(); }
+        else if (e.key === 'Backspace') { e.preventDefault(); deleteLast(); }
+    });
+
+    const logo = document.getElementById("logo");
+    let letters = Array.from(document.querySelectorAll(".letter"));
+    let logoInterval;
+    let isHovering = false;
+
+    function shuffle(arr) {
+        let a = [...arr];
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    }
+
+    function smoothShuffle() {
+        const order = shuffle(letters);
+        order.forEach((el, i) => {
+            setTimeout(() => {
+                const x = (Math.random() * 3 - 1.5);
+                const y = (Math.random() * 1.5 - 0.75);
+                el.style.transition = "transform 0.6s cubic-bezier(.2,.9,.2,1)";
+                el.style.transform = `translate(${x}px, ${y}px)`;
+                logo.appendChild(el);
+            }, i * 60);
+        });
+    }
+
+    function resetOrder() {
+        const original = ["S","C","O","M","P","I","D","L","E"];
+        original.forEach((char, i) => {
+            const el = letters.find(e => e.textContent === char);
+            setTimeout(() => {
+                el.style.transition = "transform 0.6s cubic-bezier(.2,.9,.2,1)";
+                el.style.transform = "translate(0px,0px)";
+                logo.appendChild(el);
+            }, i * 60);
+        });
+    }
+
+    logo.addEventListener("mouseenter", () => {
+        if (isHovering) return;
+        isHovering = true;
+        logoInterval = setInterval(smoothShuffle, 450);
+    });
+
+    logo.addEventListener("mouseleave", () => {
+        clearInterval(logoInterval);
+        resetOrder();
+        setTimeout(() => { isHovering = false; }, 500);
+    });
+
+    /* --- Image generation --- */
+    let imgQueue = [];
+    let imgBusy = false;
+
+    function processImgQueue() {
+        if (imgBusy || imgQueue.length === 0) return;
+        imgBusy = true;
+        const { parola, c, tentativo } = imgQueue.shift();
+        c.innerHTML = '<div class="img-loading"></div>';
+        const url = '/api/proxy-immagine?parola=' + encodeURIComponent(parola);
+        fetch(url).then(r => {
+            if (r.status === 503) {
+                return r.json().then(err => {
+                    if (tentativo >= 3) throw new Error('limite tentativi');
+                    const attesa = (err.estimated_time || 20) * 1000;
+                    imgQueue.unshift({ parola, c, tentativo: tentativo + 1 });
+                    setTimeout(processImgQueue, attesa);
+                });
+            }
+            if (!r.ok) throw new Error(r.status);
+            return r.blob().then(blob => {
+                const url = URL.createObjectURL(blob);
+                const img = new Image();
+                img.onload = function () { c.innerHTML = ''; c.appendChild(img); };
+                img.onerror = function () { c.innerHTML = '<div class="img-fail">' + parola.charAt(0).toUpperCase() + '</div>'; };
+                img.alt = parola;
+                img.src = url;
+            });
+        }).catch(function () {
+            c.innerHTML = '<div class="img-fail">' + parola.charAt(0).toUpperCase() + '</div>';
+        }).finally(function () {
+            imgBusy = false;
+            processImgQueue();
+        });
+    }
+
+    function generaImmagine(parola, index) {
+        const c = document.getElementById(`slot-img-${index}`);
+        if (!c) return;
+        c.classList.add('show');
+        c.innerHTML = '<div class="img-loading"></div>';
+        imgQueue.push({ parola, c, tentativo: 0 });
+        processImgQueue();
+    }
+
+    /* --- Party animation --- */
+    const partyCanvas = document.getElementById('party-canvas');
+    const partyOverlay = document.getElementById('party-overlay');
+    let partyCtx, partyPhase = 0;
+    let partyParticles = [], partyLoader, partyExploader;
+    const TWO_PI = Math.PI * 2, HALF_PI = Math.PI * 0.5;
+    const PVIEW_W = 512, PVIEW_H = 350;
+    let partyReqId = null;
+
+    function PartyPoint(x, y) { this.x = x || 0; this.y = y || 0; }
+
+    function PartyParticle(p0, p1, p2, p3) {
+        this.p0 = p0; this.p1 = p1; this.p2 = p2; this.p3 = p3;
+        this.time = 0; this.duration = 3 + Math.random() * 2;
+        this.color = '#' + Math.floor((Math.random() * 0xffffff)).toString(16);
+        this.w = 8; this.h = 6; this.complete = false;
+    }
+    PartyParticle.prototype = {
+        update: function () {
+            this.time = Math.min(this.duration, this.time + 1 / 60);
+            var f = easeOutCubic(this.time, 0, 1, this.duration);
+            var p = cubeBezier(this.p0, this.p1, this.p2, this.p3, f);
+            var dx = p.x - this.x, dy = p.y - this.y;
+            this.r = Math.atan2(dy, dx) + HALF_PI;
+            this.sy = Math.sin(Math.PI * f * 10);
+            this.x = p.x; this.y = p.y;
+            this.complete = this.time === this.duration;
+        },
+        draw: function () {
+            partyCtx.save();
+            partyCtx.translate(this.x, this.y);
+            partyCtx.rotate(this.r);
+            partyCtx.scale(1, this.sy);
+            partyCtx.fillStyle = this.color;
+            partyCtx.fillRect(-this.w * 0.5, -this.h * 0.5, this.w, this.h);
+            partyCtx.restore();
+        }
+    };
+
+    function PartyLoader(x, y) {
+        this.x = x; this.y = y; this.r = 24;
+        this._progress = 0; this.complete = false;
+    }
+    PartyLoader.prototype = {
+        reset: function () { this._progress = 0; this.complete = false; },
+        set progress(p) { this._progress = p < 0 ? 0 : (p > 1 ? 1 : p); this.complete = this._progress === 1; },
+        get progress() { return this._progress; },
+        draw: function () {
+            partyCtx.fillStyle = '#fff';
+            partyCtx.beginPath();
+            partyCtx.arc(this.x, this.y, this.r, -HALF_PI, TWO_PI * this._progress - HALF_PI);
+            partyCtx.lineTo(this.x, this.y);
+            partyCtx.closePath();
+            partyCtx.fill();
+        }
+    };
+
+    function PartyExploader(x, y) {
+        this.x = x; this.y = y;
+        this.startRadius = 24; this.time = 0;
+        this.duration = 0.4; this.progress = 0; this.complete = false;
+    }
+    PartyExploader.prototype = {
+        reset: function () { this.time = 0; this.progress = 0; this.complete = false; },
+        update: function () {
+            this.time = Math.min(this.duration, this.time + 1 / 60);
+            this.progress = easeInBack(this.time, 0, 1, this.duration);
+            this.complete = this.time === this.duration;
+        },
+        draw: function () {
+            partyCtx.fillStyle = '#fff';
+            partyCtx.beginPath();
+            partyCtx.arc(this.x, this.y, this.startRadius * (1 - this.progress), 0, TWO_PI);
+            partyCtx.fill();
+        }
+    };
+
+    function easeOutCubic(t, b, c, d) { t /= d; t--; return c * (t * t * t + 1) + b; }
+    function easeInBack(t, b, c, d, s) { s = s || 1.70158; return c * (t /= d) * t * ((s + 1) * t - s) + b; }
+
+    function cubeBezier(p0, c0, c1, p1, t) {
+        var nt = 1 - t;
+        return new PartyPoint(
+            nt * nt * nt * p0.x + 3 * nt * nt * t * c0.x + 3 * nt * t * t * c1.x + t * t * t * p1.x,
+            nt * nt * nt * p0.y + 3 * nt * nt * t * c0.y + 3 * nt * t * t * c1.y + t * t * t * p1.y
+        );
+    }
+
+    function createPartyParticles() {
+        partyParticles = [];
+        for (var i = 0; i < 128; i++) {
+            partyParticles.push(new PartyParticle(
+                new PartyPoint(PVIEW_W * 0.5, PVIEW_H * 0.5),
+                new PartyPoint(Math.random() * PVIEW_W, Math.random() * PVIEW_H),
+                new PartyPoint(Math.random() * PVIEW_W, Math.random() * PVIEW_H),
+                new PartyPoint(Math.random() * PVIEW_W, PVIEW_H + 64)
+            ));
+        }
+    }
+
+    function partyLoop() {
+        partyCtx.clearRect(0, 0, PVIEW_W, PVIEW_H);
+        switch (partyPhase) {
+            case 0: partyLoader.draw(); break;
+            case 1: partyExploader.draw(); break;
+            case 2: partyParticles.forEach(function (p) { p.draw(); }); break;
+        }
+        partyPhase === 0 ? partyLoader.progress += 1 / 45 : null;
+        if (partyPhase === 1) partyExploader.update();
+        if (partyPhase === 2) partyParticles.forEach(function (p) { p.update(); });
+        if (partyPhase === 0 && partyLoader.complete) partyPhase = 1;
+        else if (partyPhase === 1 && partyExploader.complete) partyPhase = 2;
+        else if (partyPhase === 2 && partyParticles.every(function (p) { return p.complete; })) {
+            setTimeout(function () {
+                partyOverlay.classList.remove('open');
+                if (partyReqId) cancelAnimationFrame(partyReqId);
+            }, 500);
+            return;
+        }
+        partyReqId = requestAnimationFrame(partyLoop);
+    }
+
+    function startParty() {
+        partyCanvas.width = PVIEW_W;
+        partyCanvas.height = PVIEW_H;
+        partyCtx = partyCanvas.getContext('2d');
+        partyLoader = new PartyLoader(PVIEW_W * 0.5, PVIEW_H * 0.5);
+        partyExploader = new PartyExploader(PVIEW_W * 0.5, PVIEW_H * 0.5);
+        createPartyParticles();
+        partyPhase = 0;
+        partyOverlay.classList.add('open');
+        if (partyReqId) cancelAnimationFrame(partyReqId);
+        partyLoop();
+    }
+
+    init();
+</script>
+</body>
+</html>
