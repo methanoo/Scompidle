@@ -71,6 +71,7 @@
             display: flex; align-items: center; gap: 6px; border: 1px solid rgba(255, 171, 64, 0.15);
             letter-spacing: 0.5px;
         }
+        html.light .streak-badge { color: #cb7405; background: rgba(255, 171, 64, 0.3); }
 
         .account-actions { display: flex; gap: 8px; }
         .account-actions button {
@@ -195,7 +196,7 @@
             font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
             font-size: 0.8rem; transition: all 0.2s;
         }
-        .delete { background: var(--btn-bg); color: var(--text-muted); }
+        .delete { background: var(--btn-bg); }
         .delete:hover { background: var(--btn-hover); color: var(--text-main); }
         .shuffle { background: var(--btn-bg); color: var(--text-main); }
         .shuffle:hover { background: var(--btn-hover); }
@@ -402,7 +403,7 @@
     </a>
     <button id="theme-toggle" onclick="toggleTheme()" title="Cambia tema">🌙</button>
     <div class="account-info">
-        <span class="streak-badge">🔥 <span id="streak-display">0</span> ORE</span>
+        <span class="streak-badge">🔥 <span id="streak-display">0</span> STREAK</span>
     </div>
     <div class="account-actions">
         <button class="juicy-sm stats-btn" onclick="toggleStats(true)"><span>Statistiche</span></button>
@@ -454,10 +455,6 @@
         <div id="timer">00:00:00</div>
     </div>
 </main>
-
-<div style="text-align:center;padding:12px 0;font-size:0.65rem;color:var(--text-muted)">
-    <a href="https://www.pexels.com" target="_blank" rel="noopener" style="color:var(--text-muted);text-decoration:underline">Photos provided by Pexels</a>
-</div>
 
 <div class="modal-overlay" id="auth-gate-overlay">
     <div class="modal-content">
@@ -870,22 +867,16 @@
             localStorage.setItem(doneKey, 'true');
         }
 
-        const giaCompletataUnAltra = ['facile','medio','difficile'].some(
-            d => d !== difficoltaCorrente && difficoltaCompletata(d)
-        );
-        
-        if (userStats.ultimaOraVinta !== chiaveOraCorrente && !giaCompletataUnAltra) {
-            userStats.streak = userStats.streak + 1;
-            if (userStats.streak > userStats.maxStreak) userStats.maxStreak = userStats.streak;
+        userStats.streak = userStats.streak + 1;
+        if (userStats.streak > userStats.maxStreak) userStats.maxStreak = userStats.streak;
 
-            userStats.totaleRisolti += 1;
-            userStats.totaleTentativi += tentativiOraCorrente;
-            userStats.ultimaOraVinta = chiaveOraCorrente;
-            
-            localStorage.setItem('scompidle_user_stats', JSON.stringify(userStats));
-            document.getElementById('streak-display').innerText = userStats.streak;
-            syncConServer();
-        }
+        userStats.totaleRisolti += 1;
+        userStats.totaleTentativi += tentativiOraCorrente;
+        userStats.ultimaOraVinta = chiaveOraCorrente;
+        
+        localStorage.setItem('scompidle_user_stats', JSON.stringify(userStats));
+        document.getElementById('streak-display').innerText = userStats.streak;
+        syncConServer();
     }
 
     setInterval(() => {

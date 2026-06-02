@@ -6,206 +6,175 @@
 
 ## Badges
 
-<!-- ![Status](https://img.shields.io/badge/status-active-success?style=for-the-badge) -->
-![Status](https://img.shields.io/badge/status-inactive-red?style=for-the-badge)  
- 
-![AI](https://img.shields.io/badge/AI-Groq-blueviolet?style=for-the-badge)   
-![License](https://img.shields.io/badge/license-private-lightgrey?style=for-the-badge)   
-![Game Type](https://img.shields.io/badge/type-word%20puzzle-black?style=for-the-badge)   
-
-![Frontend](https://img.shields.io/badge/frontend-HTML%20%7C%20CSS%20%7C%20JS-orange?style=for-the-badge)   
+![Status](https://img.shields.io/badge/status-active-success?style=for-the-badge)
+![AI](https://img.shields.io/badge/AI-Groq-blueviolet?style=for-the-badge)
+![Game Type](https://img.shields.io/badge/type-word%20puzzle-black?style=for-the-badge)
+![Frontend](https://img.shields.io/badge/frontend-HTML%20%7C%20CSS%20%7C%20JS-orange?style=for-the-badge)
 ![Backend](https://img.shields.io/badge/backend-node.js-green?style=for-the-badge)
+![Database](https://img.shields.io/badge/database-SQLite-blue?style=for-the-badge)
 
 ---
 
-## Preview
+## Cos'è Scompidle
 
-![Gameplay Preview](INSERIRE FOTO)
+Scompidle è un gioco di parole che cambia ogni ora. Ogni ora ricevi un nuovo puzzle con 4 parole da scoprire, legate a un tema generato dall'AI.
 
----
-
-## Cos’è Scompidle
-
-Scompidle è un gioco di parole che cambia ogni ora.
-
-Ogni ora ti arriva un nuovo puzzle, sempre diverso:
-
-* tema generato al volo
-* parole coerenti col tema
-* controllate dall’AI
-* zero ripetizioni random a caso
+![Logo](https://tiny-grass-2b73.sonounutentegoogl.workers.dev/)
 
 ---
 
 ## Come si gioca
 
-![Loop](INSERIRE FOTO)
-
-Ogni ora succede questo:
-
-1. viene scelto un tema (tipo: cucina, sport, scuola, ecc.)
-2. vengono generate 4 parole collegate tra loro
-3. tutte le lettere vengono mischiate in un unico pool
-4. tu devi ricostruire le parole
-
-Quando ne indovini una, quelle lettere spariscono dal gioco.
-
----
-
-## Meccaniche
-
+1. Viene scelto un tema (cucina, sport, scuola, ecc.)
+2. Vengono generate 4 parole collegate tra loro (lunghezze tutte diverse)
+3. Tutte le lettere vengono mischiate in un unico pool
+4. Ricostruisci le parole cliccando le lettere o usando la tastiera
+5. Quando indovini una parola, le lettere spariscono e compare un'immagine correlata
 
 ### Controlli
 
-| Tasto     | Cosa fa         |
-| --------- | --------------- |
-| A-Z       | scrivi lettere  |
-| Backspace | cancella        |
-| Spazio    | mescola lettere |
-| Enter     | invia parola    |
+| Tasto     | Azione            |
+| --------- | ----------------- |
+| A-Z       | Scrivi lettere    |
+| Backspace | Cancella ultima   |
+| Spazio    | Mescola lettere   |
+| Enter     | Invia parola      |
 
 ---
 
-## Stile del gioco
+## Funzionalità
 
-![UI](INSERIRE FOTO)
+### 3 Livelli di Difficoltà
 
-### Colori
+- **Facile** — Parole comuni e brevi (4-6 lettere), temi familiari
+- **Medio** — Difficoltà bilanciata (4-8 lettere), temi vari
+- **Difficile** — Parole più lunghe (5-9 lettere), temi specifici
 
-Ogni parola completata viene assegnata a uno stato visivo tramite colore.
-I colori non sono casuali: dipendono dalla lunghezza della parola.
+Ogni livello ha progresso e salvataggio indipendente.
 
-* 🔴 Rosso → parola più corta (minimo 4 lettere)
-* 🟠 Arancione → leggermente più lunga
-* 🟢 Verde → parole medio-lunghe
-* 🔵 Blu → parola più lunga (fino a 9 lettere)
+### Generazione AI (Groq)
 
-Le 4 parole di ogni puzzle hanno lunghezze tutte diverse, quindi ogni colore rappresenta un livello diverso di complessità.
+Usa il modello `openai/gpt-oss-120b` di Groq per generare i puzzle. Il sistema:
+- genera il puzzle un'ora prima
+- valida che non ci siano duplicati, sottoparole o lunghezze uguali
+- se fallisce, riprova automaticamente
+- tiene traccia di temi e parole già usati per evitare ripetizioni
 
+### Sistema di Autenticazione
 
----
+- ID utente generato automaticamente (formato: animale-aggettivo-numero, es. `lince-glaciale-481`)
+- Password hashata con SHA-256
+- Sincronizzazione progressi tra dispositivi
+- Possibilità di cambiare password dal profilo
 
-## Account
+![Logo](https://square-art-443c.sonounutentegoogl.workers.dev/)
 
-![Auth](INSERIRE FOTO)
+### Statistiche
 
-Ogni utente ha:
+- Ore completate
+- Streak attuale e miglior streak
+- Tentativi medi per puzzle
 
-* un ID generato tipo animale-aggettivo-numero
-* password salvata hashata
-* possibilità di sync tra dispositivi
+![Logo](https://summer-art-40af.sonounutentegoogl.workers.dev/)
 
-Esempio:
+### Immagini (Pexels)
 
+Alla scoperta di ogni parola, viene caricata un'immagine correlata tramite API Pexels, con caching locale per evitare chiamate ripetute.
 
-lince-glaciale-481
+### Temi (Dark/Light)
 
+Supporto di temi chiaro e scuro con preferenza salvata in localStorage e rispetto della preferenza di sistema.
 
----
+### Animazione di Vittoria
 
-## Sicurezza (base ma seria)
+Canvas animation con particelle e loader stile "party" al completamento di una sfida.
 
-* password hashate (SHA-256)
-* sessioni server-side
-* controlli backend sempre attivi
+![Logo](https://wild-glitter-3921.sonounutentegoogl.workers.dev/)
 
----
+### Salvataggio Progresso
 
-## Statistiche
+Il gioco salva automaticamente il progresso per ogni ora e difficoltà, permettendo di riprendere da dove si era lasciato.
 
-![Stats](INSERIRE FOTO)
+### Altro
 
-Tiene traccia di:
-
-* ore completate
-* streak attuale
-* miglior streak
-* tentativi medi per puzzle
-
-
----
-
-## AI Engine
-
-![AI](INSERIRE FOTO)
-
-Usa Groq per generare i puzzle.
-
-### Come funziona
-
-* genera il puzzle un’ora prima
-* controlla che sia valido
-* se fallisce, ritenta da solo
-* non blocca mai il gioco
-
----
-
-### Regole dei puzzle
-
-* niente parole duplicate
-* parole tra 4 e 9 lettere
-* niente ripetizioni recenti
-* tema sempre coerente
+- Logo animato con lettere che si mischiano all'hover
+- Background ondulato animato (SVG + CSS)
+- Countdown per la prossima sfida
+- Notifiche toast
+- Pulisce automaticamente i salvataggi delle ore precedenti
 
 ---
 
 ## Architettura
 
+```
 ┌──────────────────────┐    ┌──────────────┐    ┌──────────────────────────┐    ┌────────────────────┐
-│ Frontend (JS puro)   │ →  │ Express API  │ →  │ SQLite DB (2 database)   │ →  │ AI Engine (Groq)   │
+│ Frontend (JS puro)   │ →  │ Express API  │ →  │ SQLite DB (gioco + user) │ →  │ AI Engine (Groq)   │
 └──────────────────────┘    └──────────────┘    └──────────────────────────┘    └────────────────────┘
-
----
+                                    ↓
+                           ┌──────────────────┐
+                           │ Pexels API       │
+                           │ (immagini)       │
+                           └──────────────────┘
+```
 
 ## Database
 
-### game.db
-
-* storico temi
-* parole usate
-* anti-ripetizione
+### gioco.db
+- Storico temi usati
+- Storico parole usate
+- Sistema anti-ripetizione
 
 ### user.db
+- Utenti con ID anonimi
+- Password hashate (SHA-256)
+- Statistiche e streak
 
-* utenti
-* password hashate
-* statistiche e streak
+## API Endpoints
 
----
+| Metodo | Endpoint             | Descrizione                    |
+| ------ | --------------------  | ------------------------------ |
+| GET    | `/api/sfida-corrente` | Recupera la sfida dell'ora     |
+| POST   | `/api/register`       | Registra nuovo utente          |
+| POST   | `/api/login`          | Autentica utente               |
+| POST   | `/api/sync`           | Sincronizza statistiche        |
+| POST   | `/api/change-password` | Cambia password               |
+| GET    | `/api/proxy-immagine`  | Proxy immagini Pexels (cached) |
 
-## Sistema del tempo
+## Tecnologie
 
-Formato:
+- **Frontend**: HTML, CSS (variabili CSS, animazioni), JavaScript vanilla
+- **Backend**: Node.js, Express
+- **Database**: SQLite (better-sqlite3)
+- **AI**: Groq SDK (openai/gpt-oss-120b)
+- **API Terze**: Pexels (immagini stock)
 
+## Setup
 
-YYYY-M-D-HH
-
-
-Serve per:
-
-* garantire puzzle diversi ogni ora
-* sincronizzazione globale
-* evitare duplicati
-
----
+1. Clona il repository
+2. Installa le dipendenze: `npm install`
+3. Crea un file `.env` con le tue chiavi:
+   ```
+   GROQ_API_KEY=la_tua_chiave_groq
+   PEXELS_API_KEY=la_tua_chiave_pexels
+   ```
+4. Avvia il server: `node server.js`
+5. Apri `http://localhost:3000`
 
 ## Stabilità
 
-* se l’AI si rompe, il gioco continua comunque
-* retry automatici
-* recovery all’avvio
-* fallback sempre attivo
-* backend separati per auth e game
+- Se l'AI si rompe, il gioco continua comunque
+- Retry automatici con backoff
+- Cache su disco delle sfide generate
+- Recovery all'avvio: se mancano sfide per l'ora corrente o successiva, vengono generate automaticamente
+- Caching delle immagini per ridurre chiamate API
 
 ---
 
 ## Conclusione
 
-Scompidle è nato un po’ per gioco. 
-L’idea era semplice, ma metterla in piedi non lo è mai davvero.
+Scompidle è nato un po' per gioco. L'idea era semplice, ma metterla in piedi non lo è mai davvero.
 
 Non è un progetto perfetto, né qualcosa di finito: cambia e ogni tanto si rompe pure, come succede quando provi a costruire qualcosa da zero senza una guida precisa.
 
 Il giudizio finale lo lasciamo a chi ci gioca. Noi abbiamo fatto la nostra parte, adesso tocca a voi giocarci.
-
----
