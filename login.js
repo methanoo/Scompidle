@@ -46,5 +46,5 @@ app.post('/api/change-password', (req, res) => {
 
 app.listen(PORT, () => {
     console.log(` Scompidle Server attivo su: http://localhost:${PORT}`);
-    console.log(` Separazione DB Pronta (gioco.db + user.db)`);
+    console.log(` separazione DB Pronta (gioco.db + user.db)`);
 });
