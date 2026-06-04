@@ -1,0 +1,13 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "scompidle",
+  "main": "./server.js",
+  "compatibility_date": "2026-06-02",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true
+  },
+  "secrets": {
+    "required": ["GROQ_API_KEY", "PEXELS_API_KEY"]
+  }
+}
